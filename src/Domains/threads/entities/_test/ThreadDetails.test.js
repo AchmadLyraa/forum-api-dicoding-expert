@@ -6,12 +6,12 @@ describe("ThreadDetails", () => {
 			id: "thread-1",
 			title: "Thread title",
 			body: "Thread body",
-			date: "2025-01-21",
+			// Missing `username`
+			date: new Date("2025-01-21"),
 		};
 
-		// Missing `username`
 		expect(() => new ThreadDetails(invalidPayload)).toThrowError(
-			"THREAD_DETAILS.NOT_MEET_DATA_TYPE_SPECIFICATION"
+			"THREAD_DETAILS.NOT_CONTAIN_NEEDED_PROPERTY"
 		);
 	});
 
@@ -20,7 +20,7 @@ describe("ThreadDetails", () => {
 			id: "thread-1",
 			title: "Thread title",
 			body: "Thread body",
-			date: "2025-01-21",
+			date: "invalid-date", // Invalid date
 			username: 123, // `username` should be a string
 		};
 
@@ -34,7 +34,7 @@ describe("ThreadDetails", () => {
 			id: "thread-1",
 			title: "Thread title",
 			body: "Thread body",
-			date: "2025-01-21",
+			date: new Date("2025-01-21"), // Date object
 			username: "user1",
 		};
 
@@ -44,7 +44,7 @@ describe("ThreadDetails", () => {
 			id: "thread-1",
 			title: "Thread title",
 			body: "Thread body",
-			date: "2025-01-21",
+			date: new Date("2025-01-21"), // Validate Date object
 			username: "user1",
 		});
 	});

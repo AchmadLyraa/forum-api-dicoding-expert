@@ -35,13 +35,13 @@ DomainErrorTranslator._directories = {
 	"DELETE_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION":
 		new InvariantError("refresh token harus string"),
 	"NEW_THREAD.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError(
-		"gagal membuat thread baru karena ada properti yang belum lengkap"
+		"tidak dapat membuat thread baru karena properti yang dibutuhkan tidak ada"
 	),
 	"NEW_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError(
-		"gagal membuat thread baru karena tipe data tidak sesuai"
+		"tidak dapat membuat thread baru karena tipe data tidak sesuai"
 	),
 	"NEW_THREAD.TITLE_LIMIT_CHAR": new InvariantError(
-		"gagal membuat thread baru karena panjang judul melebihi batas yang diizinkan"
+		"tidak dapat membuat thread baru karena karakter title melebihi batas limit"
 	),
 
 	"THREAD_DETAILS.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError(
@@ -51,10 +51,10 @@ DomainErrorTranslator._directories = {
 		"gagal membuat detail thread baru karena tipe data tidak sesuai"
 	),
 	"NEW_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError(
-		"gagal membuat komentar baru karena properti yang diperlukan tidak ditemukan"
+		"tidak dapat membuat comment baru karena properti yang dibutuhkan tidak ada"
 	),
 	"NEW_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError(
-		"gagal membuat komentar baru karena tipe data tidak sesuai"
+		"tidak dapat membuat comment baru karena tipe data tidak sesuai"
 	),
 	"THREAD_DETAILS.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError(
 		"gagal membuat detail thread baru karena ada properti yang belum lengkap"

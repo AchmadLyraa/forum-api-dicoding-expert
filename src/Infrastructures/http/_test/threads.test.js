@@ -131,7 +131,7 @@ describe("/threads endpoint", () => {
 			expect(responseJson.message).toEqual("Thread tidak bisa ditemukan");
 		});
 
-		it("should response 400 when thread is found", async () => {
+		it("should response 200 when thread is found", async () => {
 			await UsersTableTestHelper.addUser({ id: "user-123" });
 			await ThreadTableTestHelper.addThread({ id: "thread-321" });
 			await CommentsTableTestHelper.addComment({ id: "comment01" });
@@ -148,9 +148,7 @@ describe("/threads endpoint", () => {
 			const responseJson = JSON.parse(response.payload);
 			expect(response.statusCode).toEqual(200);
 			expect(responseJson.status).toEqual("success");
-			expect(responseJson.message).toEqual(
-				"gagal membuat detail thread baru karena tipe data tidak sesuai"
-			);
+			expect(responseJson.message).toEqual(undefined);
 		});
 	});
 });
