@@ -1,11 +1,11 @@
 const AddThreadUseCase = require("../../../../Applications/use_case/AddThreadUseCase");
-// const GetThreadDetailsUseCase = require("../../../../Applications/use_case/GetThreadDetailsUseCase");
+const GetThreadDetailsUseCase = require("../../../../Applications/use_case/GetThreadDetailsUseCase");
 
 class ThreadsHandler {
 	constructor(container) {
 		this._container = container;
 		this.postThreadHandler = this.postThreadHandler.bind(this);
-		// this.getThreadsHandler = this.getThreadsHandler.bind(this);
+		this.getThreadsHandler = this.getThreadsHandler.bind(this);
 	}
 
 	async postThreadHandler(request, h) {
@@ -24,22 +24,34 @@ class ThreadsHandler {
 		return response;
 	}
 
-	// async getThreadsHandler(request, h) {
-	// 	const getThreadDetailsUseCase = this._container.getInstance(
-	// 		GetThreadDetailsUseCase.name
-	// 	);
-	// 	const { threadId } = request.params;
-	// 	const thread = await getThreadDetailsUseCase.execute(threadId);
+	async getThreadsHandler(request, h) {
+		const { threadId } = request.params;
+		const getThreadDetailsUseCase = this._container.getInstance(
+			GetThreadDetailsUseCase.name
+		);
+		try {
+			const threadDetails = await getThreadDetailsUseCase.execute(threadId);
 
-	// 	const response = h.response({
-	// 		status: "success",
-	// 		data: {
-	// 			thread,
-	// 		},
-	// 	});
-	// 	response.code(200);
-	// 	return response;
-	// }
+			return h
+				.response({
+					status: "success",
+					data: {
+						thread: threadDetails,
+					},
+				})
+				.code(200);
+		} catch (error) {
+			if (error.message === "THREAD_NOT_FOUND") {
+				return h
+					.response({
+						status: "fail",
+						message: "Thread tidak ditemukan",
+					})
+					.code(404);
+			}
+			throw error;
+		}
+	}
 }
 
 module.exports = ThreadsHandler;

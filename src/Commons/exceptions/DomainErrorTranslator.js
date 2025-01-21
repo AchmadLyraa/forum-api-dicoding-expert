@@ -10,6 +10,7 @@ DomainErrorTranslator._directories = {
 	"REGISTER_USER.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError(
 		"tidak dapat membuat user baru karena properti yang dibutuhkan tidak ada"
 	),
+
 	"REGISTER_USER.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError(
 		"tidak dapat membuat user baru karena tipe data tidak sesuai"
 	),
@@ -34,20 +35,32 @@ DomainErrorTranslator._directories = {
 	"DELETE_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION":
 		new InvariantError("refresh token harus string"),
 	"NEW_THREAD.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError(
-		"tidak dapat membuat thread baru karena properti yang dibutuhkan tidak ada"
+		"gagal membuat thread baru karena ada properti yang belum lengkap"
 	),
 	"NEW_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError(
-		"tidak dapat membuat thread baru karena tipe data tidak sesuai"
+		"gagal membuat thread baru karena tipe data tidak sesuai"
 	),
 	"NEW_THREAD.TITLE_LIMIT_CHAR": new InvariantError(
-		"tidak dapat membuat thread baru karena karakter title melebihi batas limit"
+		"gagal membuat thread baru karena panjang judul melebihi batas yang diizinkan"
 	),
 
 	"THREAD_DETAILS.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError(
-		"tidak dapat membuat thread details baru karena properti yang dibutuhkan tidak ada"
+		"gagal membuat detail thread baru karena ada properti yang belum lengkap"
 	),
 	"THREAD_DETAILS.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError(
-		"tidak dapat membuat thread details baru karena tipe data tidak sesuai"
+		"gagal membuat detail thread baru karena tipe data tidak sesuai"
+	),
+	"NEW_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError(
+		"gagal membuat komentar baru karena properti yang diperlukan tidak ditemukan"
+	),
+	"NEW_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError(
+		"gagal membuat komentar baru karena tipe data tidak sesuai"
+	),
+	"THREAD_DETAILS.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError(
+		"gagal membuat detail thread baru karena ada properti yang belum lengkap"
+	),
+	"THREAD_DETAILS.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError(
+		"gagal membuat detail thread baru karena tipe data tidak sesuai"
 	),
 };
 
