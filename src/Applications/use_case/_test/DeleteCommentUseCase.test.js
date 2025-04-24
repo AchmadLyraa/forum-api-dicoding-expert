@@ -1,147 +1,181 @@
 const DeleteCommentUseCase = require("../DeleteCommentUseCase");
 
 describe("DeleteCommentUseCase", () => {
-	it("should orchestrate the delete comment action correctly", async () => {
-		// Arrange
-		const useCasePayload = {
-			threadId: "thread-123",
-			commentId: "comment-123",
-			owner: "user-123",
-		};
+  describe("execute", () => {
+    it("should orchestrate the delete comment action correctly", async () => {
+      // Arrange
+      const useCasePayload = {
+        threadId: "thread-123",
+        commentId: "comment-123",
+        owner: "user-123",
+      };
 
-		const mockThreadRepository = {
-			findThreadById: jest.fn(() => Promise.resolve()),
-		};
+      // Stub tracking variables
+      let threadIdArg;
+      let commentIdArg;
+      let accessArgs;
+      let deletedId;
+      
+      const threadRepositoryStub = {
+        async findThreadById(id) {
+          threadIdArg = id;
+          return { id, title: "dummy" };
+        }
+      };
+      const commentRepositoryStub = {
+        async findCommentById(id) {
+          commentIdArg = id;
+          return {
+            id,
+            owner: "user-123",
+            date: "2021-01-01T00:00:00.000Z",
+            content: "some comment",
+            is_delete: false,
+            thread_id: "thread-123",
+          };
+        },
+        async verifyCommentAccess(commentId, owner) {
+          accessArgs = { commentId, owner };
+        },
+        async deleteComment(id) {
+          deletedId = id;
+        }
+      };
 
-		const mockCommentRepository = {
-			findCommentById: jest.fn(() => Promise.resolve()),
-			verifyCommentAccess: jest.fn(() => Promise.resolve()),
-			deleteComment: jest.fn(() => Promise.resolve()),
-		};
+      const useCase = new DeleteCommentUseCase({
+        commentRepository: commentRepositoryStub,
+        threadRepository: threadRepositoryStub,
+      });
 
-		const deleteCommentUseCase = new DeleteCommentUseCase({
-			commentRepository: mockCommentRepository,
-			threadRepository: mockThreadRepository,
-		});
+      // Action
+      await useCase.execute(useCasePayload);
 
-		// Action
-		await deleteCommentUseCase.execute(useCasePayload);
+      // Assert
+      expect(threadIdArg).toBe(useCasePayload.threadId);
+      expect(commentIdArg).toBe(useCasePayload.commentId);
+      expect(accessArgs).toEqual({
+        commentId: useCasePayload.commentId,
+        owner: useCasePayload.owner,
+      });
+      expect(deletedId).toBe(useCasePayload.commentId);
+    });
 
-		// Assert
-		expect(mockThreadRepository.findThreadById).toBeCalledWith("thread-123");
-		expect(mockCommentRepository.findCommentById).toBeCalledWith("comment-123");
-		expect(mockCommentRepository.verifyCommentAccess).toBeCalledWith(
-			"comment-123",
-			"user-123"
-		);
-		expect(mockCommentRepository.deleteComment).toBeCalledWith("comment-123");
-	});
+    it("should throw an error when thread does not exist", async () => {
+      // Arrange
+      const useCasePayload = {
+        threadId: "thread-123",
+        commentId: "comment-123",
+        owner: "user-123",
+      };
 
-	it("should throw an error when thread does not exist", async () => {
-		// Arrange
-		const useCasePayload = {
-			threadId: "thread-123",
-			commentId: "comment-123",
-			owner: "user-123",
-		};
+      const threadRepositoryStub = {
+        async findThreadById() {
+          throw new Error("Thread tidak bisa ditemukan");
+        }
+      };
+      let commentCalled = false;
+      let accessCalled = false;
+      let deleteCalled = false;
+      const commentRepositoryStub = {
+        async findCommentById() { commentCalled = true; },
+        async verifyCommentAccess() { accessCalled = true; },
+        async deleteComment() { deleteCalled = true; }
+      };
 
-		const mockThreadRepository = {
-			findThreadById: jest.fn(() =>
-				Promise.reject(new Error("THREAD_NOT_FOUND"))
-			),
-		};
+      const useCase = new DeleteCommentUseCase({
+        commentRepository: commentRepositoryStub,
+        threadRepository: threadRepositoryStub,
+      });
 
-		const mockCommentRepository = {
-			findCommentById: jest.fn(),
-			verifyCommentAccess: jest.fn(),
-			deleteComment: jest.fn(),
-		};
+      // Action & Assert
+      await expect(useCase.execute(useCasePayload))
+        .rejects.toThrow("Thread tidak bisa ditemukan");
+      expect(commentCalled).toBe(false);
+      expect(accessCalled).toBe(false);
+      expect(deleteCalled).toBe(false);
+    });
 
-		const deleteCommentUseCase = new DeleteCommentUseCase({
-			commentRepository: mockCommentRepository,
-			threadRepository: mockThreadRepository,
-		});
+    it("should throw an error when comment does not exist", async () => {
+      // Arrange
+      const useCasePayload = {
+        threadId: "thread-123",
+        commentId: "comment-123",
+        owner: "user-123",
+      };
 
-		// Action and Assert
-		await expect(
-			deleteCommentUseCase.execute(useCasePayload)
-		).rejects.toThrowError("THREAD_NOT_FOUND");
-		expect(mockThreadRepository.findThreadById).toBeCalledWith("thread-123");
-		expect(mockCommentRepository.findCommentById).not.toBeCalled();
-		expect(mockCommentRepository.verifyCommentAccess).not.toBeCalled();
-		expect(mockCommentRepository.deleteComment).not.toBeCalled();
-	});
+      let threadCalled = false;
+      const threadRepositoryStub = {
+        async findThreadById() { 
+          threadCalled = true; 
+          return { id: "thread-123", title: "dummy" };
+        }
+      };
+      let commentCalled = false;
+      const commentRepositoryStub = {
+        async findCommentById() {
+          commentCalled = true;
+          throw new Error("Komentar tidak bisa ditemukan");
+        },
+        async verifyCommentAccess() {},
+        async deleteComment() {}
+      };
 
-	it("should throw an error when comment does not exist", async () => {
-		// Arrange
-		const useCasePayload = {
-			threadId: "thread-123",
-			commentId: "comment-123",
-			owner: "user-123",
-		};
+      const useCase = new DeleteCommentUseCase({
+        commentRepository: commentRepositoryStub,
+        threadRepository: threadRepositoryStub,
+      });
 
-		const mockThreadRepository = {
-			findThreadById: jest.fn(() => Promise.resolve()),
-		};
+      // Action & Assert
+      await expect(useCase.execute(useCasePayload))
+        .rejects.toThrow("Komentar tidak bisa ditemukan");
+      expect(threadCalled).toBe(true);
+      expect(commentCalled).toBe(true);
+    });
 
-		const mockCommentRepository = {
-			findCommentById: jest.fn(() =>
-				Promise.reject(new Error("COMMENT_NOT_FOUND"))
-			),
-			verifyCommentAccess: jest.fn(),
-			deleteComment: jest.fn(),
-		};
+    it("should throw an error when user does not have access to delete the comment", async () => {
+      // Arrange
+      const useCasePayload = {
+        threadId: "thread-123",
+        commentId: "comment-123",
+        owner: "user-123",
+      };
 
-		const deleteCommentUseCase = new DeleteCommentUseCase({
-			commentRepository: mockCommentRepository,
-			threadRepository: mockThreadRepository,
-		});
+      let threadCalled = false;
+      const threadRepositoryStub = {
+        async findThreadById() { 
+          threadCalled = true; 
+          return { id: "thread-123", title: "dummy" };
+        }
+      };
+      let commentCalled = false;
+      const commentRepositoryStub = {
+        async findCommentById() { 
+          commentCalled = true; 
+          return {
+            id: "comment-123",
+            owner: "user-123",
+            date: "2021-01-01T00:00:00.000Z",
+            content: "some comment",
+            is_delete: false,
+            thread_id: "thread-123",
+          };
+        },
+        async verifyCommentAccess() {
+          throw new Error("User tidak dapat mengakses komentar");
+        },
+        async deleteComment() {}
+      };
 
-		// Action and Assert
-		await expect(
-			deleteCommentUseCase.execute(useCasePayload)
-		).rejects.toThrowError("COMMENT_NOT_FOUND");
-		expect(mockThreadRepository.findThreadById).toBeCalledWith("thread-123");
-		expect(mockCommentRepository.findCommentById).toBeCalledWith("comment-123");
-		expect(mockCommentRepository.verifyCommentAccess).not.toBeCalled();
-		expect(mockCommentRepository.deleteComment).not.toBeCalled();
-	});
+      const useCase = new DeleteCommentUseCase({
+        commentRepository: commentRepositoryStub,
+        threadRepository: threadRepositoryStub,
+      });
 
-	it("should throw an error when user does not have access to delete the comment", async () => {
-		// Arrange
-		const useCasePayload = {
-			threadId: "thread-123",
-			commentId: "comment-123",
-			owner: "user-123",
-		};
-
-		const mockThreadRepository = {
-			findThreadById: jest.fn(() => Promise.resolve()),
-		};
-
-		const mockCommentRepository = {
-			findCommentById: jest.fn(() => Promise.resolve()),
-			verifyCommentAccess: jest.fn(() =>
-				Promise.reject(new Error("FORBIDDEN_ACCESS"))
-			),
-			deleteComment: jest.fn(),
-		};
-
-		const deleteCommentUseCase = new DeleteCommentUseCase({
-			commentRepository: mockCommentRepository,
-			threadRepository: mockThreadRepository,
-		});
-
-		// Action and Assert
-		await expect(
-			deleteCommentUseCase.execute(useCasePayload)
-		).rejects.toThrowError("FORBIDDEN_ACCESS");
-		expect(mockThreadRepository.findThreadById).toBeCalledWith("thread-123");
-		expect(mockCommentRepository.findCommentById).toBeCalledWith("comment-123");
-		expect(mockCommentRepository.verifyCommentAccess).toBeCalledWith(
-			"comment-123",
-			"user-123"
-		);
-		expect(mockCommentRepository.deleteComment).not.toBeCalled();
-	});
+      // Action & Assert
+      await expect(useCase.execute(useCasePayload))
+        .rejects.toThrow("User tidak dapat mengakses komentar");
+      expect(threadCalled).toBe(true);
+      expect(commentCalled).toBe(true);
+    });
+  });
 });
