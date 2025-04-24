@@ -23,13 +23,16 @@ const init = async () => {
 // Fungsi serverless untuk Vercel
 const serverless = async (req, res) => {
   try {
+    // Log request untuk debugging
+    console.log(`Request: ${req.method} ${req.url}`);
+
     const server = await createServer(container);
 
     // Konversi request Vercel ke format Hapi
     const options = {
       method: req.method,
       url: req.url,
-      payload: req.body,
+      payload: req.body || null, // Pastikan payload nggak undefined
       headers: req.headers,
     };
 
@@ -42,12 +45,25 @@ const serverless = async (req, res) => {
       res.setHeader(key, value);
     });
 
-    // Kirim payload sebagai response
-    res.end(response.payload);
+    // Pastikan payload adalah string
+    const payload = typeof response.payload === 'string' 
+      ? response.payload 
+      : JSON.stringify(response.payload);
+
+    // Kirim response
+    res.end(payload);
   } catch (error) {
-    console.error('Error di serverless function:', error);
+    console.error('Error di serverless function:', {
+      message: error.message,
+      stack: error.stack,
+    });
     res.statusCode = 500;
-    res.end(JSON.stringify({ message: 'Internal Server Error' }));
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ 
+      status: 'error',
+      message: 'Internal Server Error',
+      details: process.env.NODE_ENV === 'production' ? undefined : error.message,
+    }));
   }
 };
 
