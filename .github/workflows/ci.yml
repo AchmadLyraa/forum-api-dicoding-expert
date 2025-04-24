@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [postman-berhasil]
   pull_request:
-    branches: [main]
+    branches: [postman-berhasil]
 
 jobs:
   test:
