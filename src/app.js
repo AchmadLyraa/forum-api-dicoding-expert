@@ -12,42 +12,49 @@ require('dotenv').config();
 const createServer = require('./Infrastructures/http/createServer');
 const container = require('./Infrastructures/container');
 
-// For local development
+// Fungsi untuk inisialisasi server lokal (development)
 const init = async () => {
   const server = await createServer(container);
   await server.start();
-  console.log(`server start at ${server.info.uri}`);
+  console.log(`Server berjalan di ${server.info.uri}`);
   return server;
 };
 
-// For Vercel deployment - serverless function
+// Fungsi serverless untuk Vercel
 const serverless = async (req, res) => {
-  const server = await createServer(container);
-  
-  // Convert request from Vercel to hapi
-  const options = {
-    method: req.method,
-    url: req.url,
-    payload: req.body,
-    headers: req.headers,
-  };
+  try {
+    const server = await createServer(container);
 
-  const response = await server.inject(options);
-  
-  // Return hapi response to Vercel
-  res.statusCode = response.statusCode;
-  
-  // Set response headers
-  Object.entries(response.headers).forEach(([key, value]) => {
-    res.setHeader(key, value);
-  });
-  
-  res.end(response.payload);
+    // Konversi request Vercel ke format Hapi
+    const options = {
+      method: req.method,
+      url: req.url,
+      payload: req.body,
+      headers: req.headers,
+    };
+
+    // Injeksi request ke server Hapi
+    const response = await server.inject(options);
+
+    // Set status code dan header untuk response Vercel
+    res.statusCode = response.statusCode;
+    Object.entries(response.headers).forEach(([key, value]) => {
+      res.setHeader(key, value);
+    });
+
+    // Kirim payload sebagai response
+    res.end(response.payload);
+  } catch (error) {
+    console.error('Error di serverless function:', error);
+    res.statusCode = 500;
+    res.end(JSON.stringify({ message: 'Internal Server Error' }));
+  }
 };
 
-// Run init for local, export serverless for Vercel
-if (process.env.NODE_ENV !== 'production') {
+// Jalankan init hanya di lingkungan lokal (bukan Vercel)
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
   init();
 }
 
+// Ekspor fungsi serverless untuk Vercel
 module.exports = serverless;
