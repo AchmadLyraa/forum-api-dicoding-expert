@@ -5,8 +5,8 @@ class HelloHandler {
 
   async getHelloHandler() {
     return {
-      status: 'fail',
-      message: 'hello world!!!',
+      status: 'success',
+      message: 'hello world!',
     };
   }
 }
