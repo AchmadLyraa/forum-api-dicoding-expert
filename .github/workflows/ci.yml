@@ -1,15 +1,50 @@
-name: CI
+# name: CI
 
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches: [main]
+
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+
+#     services:
+#       postgres:
+#         image: postgres:14
+#         env:
+#           POSTGRES_USER: developer
+#           POSTGRES_PASSWORD: 2436
+#           POSTGRES_DB: forumapi_test
+#         ports:
+#           - 5432:5432
+#         options: >-
+#           --health-cmd pg_isready
+#           --health-interval 10s
+#           --health-timeout 5s
+#           --health-retries 5
+
+#     steps:
+#       - uses: actions/checkout@v3
+#       - name: Use Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: '20'
+#           cache: 'npm'
+#       - run: npm ci
+#       - run: npm run migrate:test up
+#       - run: npm run test:coverage
+
+name: CI-CD
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-
 jobs:
   test:
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:14
@@ -24,7 +59,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
@@ -35,3 +69,30 @@ jobs:
       - run: npm ci
       - run: npm run migrate:test up
       - run: npm run test:coverage
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run migrations
+        run: npm run migrate:vercel
+        env:
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
+          PGSSLMODE: require
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+      - name: Deploy to Vercel
+        run: vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
