@@ -81,14 +81,14 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - name: Run migrations
-        run: npm run migrate:vercel
+        run: npm run migrate up
         env:
           PGHOST: ${{ secrets.PGHOST }}
           PGPORT: ${{ secrets.PGPORT }}
           PGUSER: ${{ secrets.PGUSER }}
           PGPASSWORD: ${{ secrets.PGPASSWORD }}
           PGDATABASE: ${{ secrets.PGDATABASE }}
-          PGSSLMODE: require
+          PGSSLMODE: ${{ secrets.PGSSLMODE }}
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
       - name: Deploy to Vercel
