@@ -52,7 +52,7 @@ const serverless = async (req, res) => {
 };
 
 // Jalankan init hanya di lingkungan lokal (bukan Vercel)
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   init();
 }
 
