@@ -69,30 +69,30 @@ jobs:
       - run: npm ci
       - run: npm run migrate:test up
       - run: npm run test:coverage
-  deploy:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - name: Run migrations
-        run: npm run migrate up
-        env:
-          PGHOST: ${{ secrets.PGHOST }}
-          PGPORT: ${{ secrets.PGPORT }}
-          PGUSER: ${{ secrets.PGUSER }}
-          PGPASSWORD: ${{ secrets.PGPASSWORD }}
-          PGDATABASE: ${{ secrets.PGDATABASE }}
-          PGSSLMODE: ${{ secrets.PGSSLMODE }}
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-      - name: Deploy to Vercel
-        run: vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: test
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Use Node.js
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: '20'
+  #         cache: 'npm'
+  #     - run: npm ci
+  #     - name: Run migrations
+  #       run: npm run migrate up
+  #       env:
+  #         PGHOST: ${{ secrets.PGHOST }}
+  #         PGPORT: ${{ secrets.PGPORT }}
+  #         PGUSER: ${{ secrets.PGUSER }}
+  #         PGPASSWORD: ${{ secrets.PGPASSWORD }}
+  #         PGDATABASE: ${{ secrets.PGDATABASE }}
+  #         PGSSLMODE: ${{ secrets.PGSSLMODE }}
+  #     - name: Install Vercel CLI
+  #       run: npm install -g vercel@latest
+  #     - name: Deploy to Vercel
+  #       run: vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+  #       env:
+  #         VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  #         VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
